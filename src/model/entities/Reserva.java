@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import model.exceptions.DomainException;
+
 public class Reserva {
 	
 	private Integer numeroDoQuarto;
@@ -12,7 +14,11 @@ public class Reserva {
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	
-	public Reserva(Integer numeroDoQuarto, Date dataDeEntrada, Date dataDeSaida) {
+	public Reserva(Integer numeroDoQuarto, Date dataDeEntrada, Date dataDeSaida){
+		if (!dataDeSaida.after(dataDeEntrada)){
+			throw new DomainException("A data de saída precisa ser posterior à data de entrada.");
+		}
+		
 		this.numeroDoQuarto = numeroDoQuarto;
 		this.dataDeEntrada = dataDeEntrada;
 		this.dataDeSaida = dataDeSaida;
@@ -40,25 +46,23 @@ public class Reserva {
 		return TimeUnit.DAYS.convert(dif, TimeUnit.MILLISECONDS); //converte os milisegundos em data
 	}
 	
-	public String atualizaData(Date dataDeEntrada, Date dataDeSaida) {
+	public void atualizaData(Date dataDeEntrada, Date dataDeSaida){
 		Date agora = new Date();
 		
 		if (dataDeEntrada.before(agora) || dataDeSaida.before(agora)) {
-			return "As datas para atualizações devem ser datas futuras.";
+			throw new DomainException("As datas para atualizações devem ser datas futuras.");
 		}
 		if (!dataDeSaida.after(dataDeEntrada)){
-			return "A data de saída precisa ser posterior à data de entrada.";
+			throw new DomainException("A data de saída precisa ser posterior à data de entrada.");
 		}
 		
 		this.dataDeEntrada = dataDeEntrada;
 		this.dataDeSaida = dataDeSaida;
-		
-		return null;
 	}
 	
 	@Override
 	public String toString() {
-		return  "Reserva: \nQuarto " +
+		return  "Quarto " +
 				this.numeroDoQuarto +
 				" \nData de entrada: " +
 				sdf.format(dataDeEntrada) +
